@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GNN Recommendations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+        h1 {
+            text-align: center;
+        }
+        input[type="file"] {
+            margin: 10px 0;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #output {
+            margin-top: 20px;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border: 1px solid #ccc;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload CSVs for GNN Recommendations</h1>
+        <form id="uploadForm">
+            <label for="edges">Upload Edges CSV:</label>
+            <input type="file" id="edges" name="edges" accept=".csv" required>
+
+            <label for="user_features">Upload User Features CSV:</label>
+            <input type="file" id="user_features" name="user_features" accept=".csv" required>
+
+            <label for="song_features">Upload Song Features CSV:</label>
+            <input type="file" id="song_features" name="song_features" accept=".csv" required>
+
+            <button type="submit">Get Recommendations</button>
+        </form>
+
+        <div id="output">
+            <h3>Recommendations:</h3>
+            <pre id="recommendations"></pre>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById("uploadForm");
+        const recommendationsOutput = document.getElementById("recommendations");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch("/recommend", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                if (response.ok) {
+                    const recommendations = await response.json();
+                    recommendationsOutput.textContent = JSON.stringify(recommendations, null, 4);
+                } else {
+                    recommendationsOutput.textContent = "Error processing the data.";
+                }
+            } catch (error) {
+                recommendationsOutput.textContent = `Error: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>
