@@ -62,10 +62,6 @@ def recommend(graph, encrypted_user_features, encrypted_song_features):
         recommendations[user] = scores
     return recommendations
 
-@app.route("/")
-def index():
-    return render_template("index.html")
-
 @app.route("/recommend", methods=["POST"])
 def get_recommendations():
     # Read uploaded files

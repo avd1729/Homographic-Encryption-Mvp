@@ -51,7 +51,7 @@ const UploadForm = () => {
     setProgress(20);
 
     try {
-      const response = await fetch("/recommend", {
+      const response = await fetch("http://localhost:5000/recommend", {
         method: "POST",
         body: formData,
       });
