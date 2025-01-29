@@ -1,9 +1,11 @@
 from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS
 import pandas as pd
 import networkx as nx
 import tenseal as ts
 
 app = Flask(__name__)
+CORS(app)
 
 # GNN logic from previous code
 def create_context():
