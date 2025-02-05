@@ -1,3 +1,6 @@
 /venv/
 /data/
 /frontend/
+*__pycache__
+/instance/
+*.env

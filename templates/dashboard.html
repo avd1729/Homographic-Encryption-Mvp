@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GNN Recommendations</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 1.8rem;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 8px;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f8f8f8;
+            cursor: pointer;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        #output {
+            margin-top: 20px;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+        }
+
+        pre {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .progress {
+            margin-top: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            height: 8px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: #4CAF50;
+            transition: width 0.3s ease;
+        }
+
+        .validation-message {
+            color: #d32f2f;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px;
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>GNN Recommendations</h1>
+        <a href="{{ url_for('logout') }}">Logout</a>
+        <form id="uploadForm">
+            <label for="edges">Upload Edges CSV:</label>
+            <input type="file" id="edges" name="edges" accept=".csv" required>
+            <div id="edgesValidation" class="validation-message">Please upload a valid edges CSV file.</div>
+
+            <label for="user_features">Upload User Features CSV:</label>
+            <input type="file" id="user_features" name="user_features" accept=".csv" required>
+            <div id="userFeaturesValidation" class="validation-message">Please upload a valid user features CSV file.</div>
+
+            <label for="song_features">Upload Song Features CSV:</label>
+            <input type="file" id="song_features" name="song_features" accept=".csv" required>
+            <div id="songFeaturesValidation" class="validation-message">Please upload a valid song features CSV file.</div>
+
+            <button type="submit" id="submitBtn">Get Recommendations</button>
+            <div class="progress" id="progressBarContainer" style="display: none;">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+        </form>
+
+        <div id="output">
+            <h3>Recommendations:</h3>
+            <pre id="recommendations">No recommendations yet.</pre>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById("uploadForm");
+        const recommendationsOutput = document.getElementById("recommendations");
+        const progressBar = document.getElementById("progressBar");
+        const progressBarContainer = document.getElementById("progressBarContainer");
+
+        const validateFileInput = (input, validationMessageId) => {
+            const file = input.files[0];
+            const validationMessage = document.getElementById(validationMessageId);
+
+            if (file && file.name.endsWith(".csv")) {
+                validationMessage.style.display = "none";
+                return true;
+            } else {
+                validationMessage.style.display = "block";
+                return false;
+            }
+        };
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            // Validate inputs
+            const isEdgesValid = validateFileInput(document.getElementById("edges"), "edgesValidation");
+            const isUserFeaturesValid = validateFileInput(document.getElementById("user_features"), "userFeaturesValidation");
+            const isSongFeaturesValid = validateFileInput(document.getElementById("song_features"), "songFeaturesValidation");
+
+            if (!isEdgesValid || !isUserFeaturesValid || !isSongFeaturesValid) {
+                return;
+            }
+
+            const formData = new FormData(form);
+            progressBarContainer.style.display = "block";
+            progressBar.style.width = "20%";
+
+            try {
+                const response = await fetch("/recommend", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                progressBar.style.width = "60%";
+
+                if (response.ok) {
+                    const recommendations = await response.json();
+                    recommendationsOutput.textContent = JSON.stringify(recommendations, null, 4);
+                } else {
+                    recommendationsOutput.textContent = "Error processing the data.";
+                }
+
+                progressBar.style.width = "100%";
+                setTimeout(() => {
+                    progressBarContainer.style.display = "none";
+                }, 500);
+            } catch (error) {
+                recommendationsOutput.textContent = `Error: ${error.message}`;
+                progressBarContainer.style.display = "none";
+            }
+        });
+
+        document.querySelectorAll("input[type='file']").forEach((input) => {
+            input.addEventListener("change", (e) => {
+                const validationMessageId = e.target.id + "Validation";
+                validateFileInput(input, validationMessageId);
+            });
+        });
+    </script>
+</body>
+</html>
