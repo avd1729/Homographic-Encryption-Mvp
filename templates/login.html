@@ -2,14 +2,86 @@
 <html lang="en">
 <head>
     <title>Login</title>
+    <style>
+        body {
+            background-image: url('{{ url_for('static', filename='images/82457135_9959193.jpg') }}');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: white;
+            font-family: 'Verdana', sans-serif;
+        }
+
+        .login-container { /* Container for login form */
+            padding: 40px; /* Increased padding */
+            border-radius: 10px;
+            text-align: left; /* Align text within the container to the left */
+            width: 400px; /* Set a specific width for the container */
+            margin-left: 60%; /* Adjust this value for horizontal positioning */
+            margin-top: 10%; /* Adjust this value for vertical positioning */
+        }
+
+        h1 {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 20px; /* Add margin below the heading */
+            text-align: center; /* Center the heading */
+        }
+
+        form {
+            display: block; /* Ensure form is a block element */
+        }
+
+        input[type="text"], input[type="password"] {
+            padding: 15px;
+            margin: 15px 0; /* Only vertical margins */
+            border: none;
+            border-radius: 10px;
+            width: calc(100% - 30px); /* Adjust width for padding */
+            box-sizing: border-box; /* Include padding in width calculation */
+        }
+
+        button {
+            padding: 15px 20px; /* Increased padding */
+            background-color: #FFD700;
+            border: none;
+            border-radius: 5px;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+            width: 95%; /* Make button full width */
+            margin-top: 15px; /* Add margin above the button */
+        }
+
+        button:hover {
+            background-color: #FFC300;
+        }
+
+        .signup-link { /* Style the signup link container */
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        a {
+            color: #FFD700;
+            text-decoration: none;
+            font-size: 18px;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-    <h1>Login</h1>
-    <form method="POST">
-        <input type="text" name="username" placeholder="Username" required><br>
-        <input type="password" name="password" placeholder="Password" required><br>
-        <button type="submit">Login</button>
-    </form>
-    <a href="{{ url_for('register') }}">Don't have an account? Register</a>
+    <div class="login-container">  <h1>Login</h1>
+        <form method="POST">
+            <input type="text" name="username" placeholder="Username" required><br>
+            <input type="password" name="password" placeholder="Password" required><br>
+            <button type="submit">Login</button>
+        </form>
+        <div class="signup-link"> <a href="{{ url_for('register') }}">Don't have an account? Register</a>
+        </div>
+    </div>
 </body>
 </html>

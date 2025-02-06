@@ -7,17 +7,25 @@
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f9f9f9;
+            background-image: url('{{ url_for('static', filename='images/23604887_sl_123119_26540_08.jpg') }}');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
             color: #333;
             margin: 0;
             padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
 
         .container {
             max-width: 500px;
-            margin: 50px auto;
+            margin: 50px 50px 50px auto;
             padding: 20px;
-            background-color: #fff;
+            background-color: rgba(255, 255, 255, 0.95); /* More opaque for better readability */
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
@@ -109,6 +117,10 @@
         }
 
         @media (max-width: 600px) {
+            body {
+                justify-content: center;
+            }
+
             .container {
                 margin: 20px;
                 padding: 15px;
