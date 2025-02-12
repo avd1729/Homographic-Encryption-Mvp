@@ -2,6 +2,62 @@
 <html lang="en">
 <head>
     <title>Register</title>
+    <style>
+        body {
+            background-image: url('{{ url_for('static', filename='images/13514659_SL.123119.26540.04.jpg') }}');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: white;
+            text-align: center;
+            padding-top: 10%;
+            font-family: 'Verdana', sans-serif;
+        }
+
+        h1 {
+            font-size: 48px;
+            font-weight: bold;
+        }
+
+        form {
+            padding: 15px;
+            display: inline-block;
+            border-radius: 10px;
+        }
+
+        input[type="text"], input[type="password"] {
+            padding: 20px;
+            margin: 20px;
+            border: none;
+            border-radius: 10px;
+            width: 80%;
+        }
+
+    
+        button {
+            padding: 10px 20px;
+            background-color: #FFD700;
+            border: none;
+            border-radius: 10px;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #FFC300;
+        }
+
+        a {
+            color: #FFD700;
+            text-decoration: none;
+            font-size: 20px;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
     <h1>Register</h1>
@@ -10,6 +66,7 @@
         <input type="password" name="password" placeholder="Password" required><br>
         <button type="submit">Register</button>
     </form>
+    <br><br>
     <a href="{{ url_for('login') }}">Already have an account? Login</a>
 </body>
 </html>
