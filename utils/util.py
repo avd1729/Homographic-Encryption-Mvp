@@ -1,13 +1,14 @@
 import tenseal as ts
 import networkx as nx
+import numpy as np
 
 def create_context():
     context = ts.context(
-        ts.SCHEME_TYPE.CKKS,
+        ts.SCHEME_TYPE.BFV,  # Change to BGV if needed
         poly_modulus_degree=8192,
-        coeff_mod_bit_sizes=[60, 40, 40, 60]
+        coeff_mod_bit_sizes=[60, 40, 40, 60],
+        plain_modulus=1032193  # Ensure plain modulus is a prime > max(feature values)
     )
-    context.global_scale = 2**40
     context.generate_galois_keys()
     return context
 
@@ -20,27 +21,41 @@ def create_graph(edges_df):
     G.add_edges_from(edges_df.to_records(index=False))
     return G
 
+def scale_features(features, scale_factor=1000):
+    return {key: (np.array(value) * scale_factor).astype(int).tolist() for key, value in features.items()}
+
 def encrypt_features(context, features):
-    return {key: ts.ckks_vector(context, value) for key, value in features.items()}
+    return {key: ts.bfv_vector(context, value) for key, value in features.items()}
+
+def modular_inverse(value, modulus):
+    """Compute modular inverse using Fermat's Little Theorem (modular arithmetic trick)."""
+    return pow(value, -1, modulus) if value != 0 else 1  # Avoid division by zero
 
 def gnn_layer(graph, user_features, song_features, context):
+    plain_modulus = 1032193  # Must match context's plain modulus
     updated_user_features = {}
     updated_song_features = {}
-    
+
     for user in [n for n, d in graph.nodes(data=True) if d["bipartite"] == 0]:
-        aggregated = ts.ckks_vector(context, [0] * len(user_features[user].decrypt()))
+        aggregated = ts.bfv_vector(context, [0] * len(user_features[user].decrypt()))
         for neighbor in graph.neighbors(user):
             aggregated += song_features[neighbor]
-        if len(list(graph.neighbors(user))) > 0:
-            aggregated *= 1 / len(list(graph.neighbors(user))) 
+        neighbor_count = len(list(graph.neighbors(user)))
+
+        if neighbor_count > 0:
+            inv_neighbor_count = modular_inverse(neighbor_count, plain_modulus)
+            aggregated *= inv_neighbor_count  # Multiply by modular inverse instead of dividing
         updated_user_features[user] = aggregated
     
     for song in [n for n, d in graph.nodes(data=True) if d["bipartite"] == 1]:
-        aggregated = ts.ckks_vector(context, [0] * len(song_features[song].decrypt()))
+        aggregated = ts.bfv_vector(context, [0] * len(song_features[song].decrypt()))
         for neighbor in graph.neighbors(song):
             aggregated += user_features[neighbor]
-        if len(list(graph.neighbors(user)))  > 0:
-            aggregated *= 1 / len(list(graph.neighbors(user))) 
+        neighbor_count = len(list(graph.neighbors(song)))
+
+        if neighbor_count > 0:
+            inv_neighbor_count = modular_inverse(neighbor_count, plain_modulus)
+            aggregated *= inv_neighbor_count  # Multiply by modular inverse instead of dividing
         updated_song_features[song] = aggregated
 
     return updated_user_features, updated_song_features
