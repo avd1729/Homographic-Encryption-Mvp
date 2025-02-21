@@ -1,4 +1,5 @@
-import os
+from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS
 import pandas as pd
 from dotenv import load_dotenv
 from flask import Flask, render_template, redirect, url_for, flash, request, jsonify
@@ -11,8 +12,7 @@ from utils.util import create_context, create_graph, encrypt_features, gnn_layer
 load_dotenv()
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+CORS(app)
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
@@ -35,43 +35,6 @@ def load_user(user_id):
 @app.route('/')
 def home():
     return render_template('index.html')
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        user = User(username=username)
-        user.set_password(password)
-        db.session.add(user)
-        db.session.commit()
-        flash('Registration successful! You can now log in.', 'success')
-        return redirect(url_for('login'))
-    return render_template('register.html')
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        user = User.query.filter_by(username=username).first()
-        if user and bcrypt.check_password_hash(user.password, password):
-            login_user(user)
-            return redirect(url_for('dashboard'))
-        else:
-            flash('Login unsuccessful. Please check username and password.', 'danger')
-    return render_template('login.html')
-
-@app.route('/dashboard')
-@login_required
-def dashboard():
-    return render_template('dashboard.html', username=current_user.username)
-
-@app.route('/logout')
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for('home'))
 
 @app.route("/recommend", methods=["POST"])
 @login_required
